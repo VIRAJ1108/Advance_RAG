@@ -1,0 +1,12 @@
+langchain
+langchain-community
+langchain-huggingface
+faiss-cpu
+pypdf
+python-dotenv
+sentence-transformers
+rank-bm25
+groq
+langchain-groq
+flask
+gradio
