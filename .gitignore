@@ -1,6 +1,8 @@
+myenv/
 __pycache__/
 *.pyc
-myenv/
-venv/
 .env
-data/uploads/
+*.log
+*.sqlite3
+.streamlit/
+.cache/
