@@ -221,7 +221,7 @@ class RAGPipeline:
         self.bm25 = None
         self.documents = None
 
-        self.reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+        self.reranker = None    #LAZY LOADING THE MODELS
         self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
     # -------------------------
@@ -304,6 +304,9 @@ Only return the questions.
     # RERANKING
     # -------------------------
     def rerank_documents(self, query, docs, top_k=5):
+        if self.reranker is None:
+            self.reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+
         if not docs:
             return []
 

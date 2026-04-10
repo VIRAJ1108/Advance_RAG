@@ -1,6 +1,10 @@
 import streamlit as st
 from app.pipeline.rag_pipeline import RAGPipeline
 
+@st.cache_resource
+def load_pipeline():
+    return RAGPipeline()
+
 st.set_page_config(page_title="Advanced RAG", layout="wide")
 
 st.title("📄 Advanced RAG Chatbot")
@@ -9,7 +13,7 @@ st.title("📄 Advanced RAG Chatbot")
 # INIT PIPELINE
 # -------------------------
 if "pipeline" not in st.session_state:
-    st.session_state.pipeline = RAGPipeline()
+    st.session_state.pipeline = load_pipeline()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -59,3 +63,4 @@ if query:
 
     with st.chat_message("assistant"):
         st.markdown(answer)
+
