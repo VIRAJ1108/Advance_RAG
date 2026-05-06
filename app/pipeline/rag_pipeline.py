@@ -204,7 +204,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from rank_bm25 import BM25Okapi
 from sentence_transformers import CrossEncoder
-
+from fastapi import UploadFile
 import tempfile
 import numpy as np
 from groq import Groq
@@ -232,12 +232,41 @@ class RAGPipeline:
 
         for file in uploaded_files:
             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(file.read())
+                tmp.write(file.read())   # Streamlit uses .read()
                 loader = PyPDFLoader(tmp.name)
                 docs.extend(loader.load())
 
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=800,        # 🔥 improved
+            chunk_size=800,
+            chunk_overlap=100
+        )
+
+        split_docs = splitter.split_documents(docs)
+        self.documents = split_docs
+
+        embeddings = HuggingFaceEmbeddings()
+        self.vectorstore = FAISS.from_documents(split_docs, embeddings)
+        self.retriever = self.vectorstore.as_retriever(search_kwargs={"k": 4})
+
+        tokenized_docs = [doc.page_content.split() for doc in split_docs]
+        self.bm25 = BM25Okapi(tokenized_docs)
+
+        
+    def load_documents_api(self, files: list[UploadFile]):
+        docs = []
+
+        for file in files:
+            content = file.file.read()
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                tmp.write(content)
+                tmp_path = tmp.name
+
+            loader = PyPDFLoader(tmp_path)
+            docs.extend(loader.load())
+
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=800,
             chunk_overlap=100
         )
 
@@ -442,3 +471,12 @@ Only return the questions.
     """
 
         return {"answer": final_answer}
+    
+# =========================
+# GLOBAL PIPELINE INSTANCE
+# =========================
+pipeline = RAGPipeline()
+
+
+def run_rag(query: str):
+    return pipeline.run(query)
