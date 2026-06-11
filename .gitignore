@@ -7,3 +7,7 @@ __pycache__/
 .streamlit/
 .cache/
 data/uploads/
+data
+requirements_full.txt
+baseline_requirements.txt
+evaluation_results.csv
